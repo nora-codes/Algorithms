@@ -33,7 +33,7 @@ void add_pairs(void);
 void sort_pairs(void);
 void lock_pairs(void);
 void print_winner(void);
-bool check_loop(int i, int start);
+int check_loop(int loser);
 
 int main(int argc, string argv[])
 {
@@ -220,10 +220,10 @@ void lock_pairs(void)
     locked[pairs[0].winner][pairs[0].loser] = true;
 
     // For all other pairs in decreasing order through sorted array
-    // Check for loop with check_loop function
+    // Check for a loop with check_loop function
     for (int i = 1; i < pair_count; i++)
     {
-        if (check_loop(pairs[i].loser, pairs[i].winner) == false)
+        if (check_loop(pairs[i].loser) != pairs[i].winner)
         {
             // If there is no loop - enter pair into locked array
             // In other words - add in an edge to the graph
@@ -271,58 +271,23 @@ void print_winner(void)
     return;
 }
 
-bool check_loop(int i, int start)
+int check_loop(int loser)
 {
-    // Look for a loop in the graph
-
-    // Input i = loser of input pair
-    // Find out if the loser i is the winner (source) of another locked pair
-    // Check through locked pairs for winner i
-    // Input i is used for recursions of this function
-
-    // Input start is the beginning of the original loop called to check
-    // This intput doesn't change through recursions
-
-    // Search through locked array
-    for (int j = 0; j < pair_count; j++)
+    // Iterate through sorted pairs
+    for (int i = 0; i < pair_count ; i++)
     {
-        // If a locked pair is found with winner i
-        if (locked[i][j] == true)
+        // If pair is locked
+        if (locked[pairs[i].winner][pairs[i].loser] == true)
         {
-            // Check the loser of the locked pair with start input
-            if (j == start)
+            // If winner of pair is equal to input loser
+            if (pairs[i].winner == loser)
             {
-                // If there is a match - a loop has been identified
-                // Return loop check as true
-                return true;
-            }
-
-            else
-            {
-                // If there is not a match - the loop has not been closed
-                // Check the next locked pair in the loop using recursion
-                if (check_loop(j, start) == true)
-                {
-                    // If a loop is found in the recursion
-                    // Return loop check as true
-                    return true;
-                }
-
-                else
-                {
-                    // If a loop is not found in the recursion
-                    // Return loop check as false
-                    return false;
-                }
+                // Chain is found - check for next link in chain
+                return (check_loop(pairs[i].loser));
             }
         }
-
-        // If a locked pair is not found with winner i
-        // Check next selection in locked array
     }
 
-    // If no locked pairs are found with winner i
-    // No loop has been identified
-    // Return loop check as false
-    return false;
+    // Return loser to check for loop
+    return loser;
 }
